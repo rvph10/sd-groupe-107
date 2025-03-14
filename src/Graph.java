@@ -30,6 +30,20 @@ public class Graph {
         }
     }
 
+    private void initLinks(String fichierMentions){
+        String linkfile = "data/" + fichierMentions;
+        try (BufferedReader br = new BufferedReader(new FileReader(linkfile))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                Link link = new Link(artistes.get(parts[0]), , Integer.parseInt(parts[2]));
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void trouverCheminLePlusCourt(String artiste1, String artiste2) {
         // TODO
         return;
