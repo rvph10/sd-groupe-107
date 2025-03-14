@@ -1,13 +1,14 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class Artist {
 
     private int id;
     private String nom;
-    private ArrayList<String> categories;
+    private HashSet<String> categories;
 
-    public Artist(int id, String nom, ArrayList<String> categories) {
+    public Artist(int id, String nom, HashSet<String> categories) {
         this.id = id;
         this.nom = nom;
         this.categories = categories;
@@ -29,11 +30,11 @@ public class Artist {
         this.nom = nom;
     }
 
-    public ArrayList<String> getCategories() {
+    public HashSet<String> getCategories() {
         return categories;
     }
 
-    public void setCategories(ArrayList<String> categories) {
+    public void setCategories(HashSet<String> categories) {
         this.categories = categories;
     }
 
