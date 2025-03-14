@@ -17,7 +17,7 @@ public class Lien{
         return destination;
     }
 
-    public Artiste getOccurrence(){
+    public int getOccurrence(){
         return occurrence;
     }
 }
