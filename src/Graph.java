@@ -7,8 +7,6 @@ public class Graph {
         this.fichierMentions = fichierMentions;
     }
 
-    
-
     public void trouverCheminLePlusCourt(String artiste1, String artiste2) {
         // TODO
         return;

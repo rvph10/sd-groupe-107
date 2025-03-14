@@ -1,19 +1,19 @@
-public class Lien{
+public class Link{
 
-    private Artiste source, destination;
+    private Artist source, destination;
     private int occurrence;
 
-    public Lien(Artiste source, Artiste destination, int occurrence){
+    public Link(Artist source, Artist destination, int occurrence){
         this.source = source;
         this.destination = destination;
         this.occurrence = occurrence;
     }
 
-    public Artiste getSource(){
+    public Artist getSource(){
         return source;
     }
 
-    public Artiste getDestination(){
+    public Artist getDestination(){
         return destination;
     }
 
