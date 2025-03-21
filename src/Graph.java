@@ -17,10 +17,11 @@ public class Graph {
         artists = new HashMap<>();
         artistsByName = new HashMap<>();
         initArtistes(fichierArtistes);
+        initLinks(fichierMentions);
     }
 
     private void initArtistes(String fichierArtistes){
-        String linkfile = "data/" + fichierArtistes;
+        String linkfile =  fichierArtistes;
         try (BufferedReader br = new BufferedReader(new FileReader(linkfile))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -39,7 +40,7 @@ public class Graph {
     }
 
     private void initLinks(String fichierMentions){
-        String linkfile = "data/" + fichierMentions;
+        String linkfile =  fichierMentions;
         try (BufferedReader br = new BufferedReader(new FileReader(linkfile))) {
             String line;
             while ((line = br.readLine()) != null) {
