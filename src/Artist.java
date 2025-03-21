@@ -15,7 +15,7 @@ public class Artist {
         this.links = new HashSet<>();
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
