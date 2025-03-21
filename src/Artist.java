@@ -6,11 +6,13 @@ public class Artist {
     private int id;
     private String nom;
     private HashSet<String> categories;
+    private HashSet<Link> links;
 
     public Artist(int id, String nom, HashSet<String> categories) {
         this.id = id;
         this.nom = nom;
         this.categories = categories;
+        this.links = new HashSet<>();
     }
 
     public long getId() {
@@ -35,6 +37,14 @@ public class Artist {
 
     public void setCategories(HashSet<String> categories) {
         this.categories = categories;
+    }
+
+    public HashSet<Link> getLinks() {
+        return links;
+    }
+
+    public void addLinks(Link link) {
+        this.links.add(link);
     }
 
     @Override

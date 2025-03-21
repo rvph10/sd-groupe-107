@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Graph {
 
-    private Map<Integer, Artist> artistes;
+    private Map<Integer, Artist> artists;
     private Map<String,Integer> artistsByName;
 
 
@@ -24,9 +24,11 @@ public class Graph {
                 String[] parts = line.split(",");
                 HashSet<String> categories = new HashSet<String>(Arrays.asList(parts[2].split(";")));
                 Artist artist = new Artist(Integer.parseInt(parts[0]), parts[1], categories);
-                artistes.put(Integer.parseInt(parts[0]), artist);
+                artists.put(Integer.parseInt(parts[0]), artist);
                 artistsByName.put(parts[1],Integer.parseInt(parts[0]) );
             }
+            System.out.println("---------------- Initialisation des artistes fini ! ---------------------");
+
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -39,8 +41,10 @@ public class Graph {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                Link link = new Link(artistes.get(parts[0]), , Integer.parseInt(parts[2]));
+                Link link = new Link(artists.get(parts[0]),artists.get(parts[1]),Integer.parseInt(parts[2]));
+                artists.get(parts[0]).addLinks(link);
             }
+            System.out.println("---------------- Initialisation des liens fini ! ---------------------");
         }
         catch (IOException e) {
             e.printStackTrace();
