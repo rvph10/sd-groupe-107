@@ -45,8 +45,8 @@ public class Graph {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                Link link = new Link(artists.get(parts[0]),artists.get(parts[1]),Integer.parseInt(parts[2]));
-                artists.get(parts[0]).addLinks(link);
+                Link link = new Link(artists.get(Integer.parseInt(parts[0])),artists.get(Integer.parseInt(parts[1])),Integer.parseInt(parts[2]));
+                artists.get(Integer.parseInt(parts[0])).addLinks(link);
             }
             System.out.println("---------------- Initialisation des liens fini ! ---------------------");
         }
