@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -9,10 +10,12 @@ import java.util.Map;
 public class Graph {
 
     private Map<Integer, Artist> artistes;
-    private Map<String,Integer> artistsByName;
+    private Map<String, Integer> artistsByName;
 
 
     public Graph(String fichierArtistes, String fichierMentions) {
+        artistes = new HashMap<>();
+        artistsByName = new HashMap<>();
         initArtistes(fichierArtistes);
     }
 
