@@ -81,7 +81,7 @@ public class Graph {
 
         System.out.println("Longueur du chemin : "+distance);
         System.out.println("Coût total du chemin : "+cost);
-        System.out.println("Chemin:");
+        System.out.println("Chemin :");
         for (Artist artist: path){
             System.out.print(artist.getNom()+" (");
             for (String categorie: artist.getCategories()){
