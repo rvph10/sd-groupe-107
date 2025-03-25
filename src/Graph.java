@@ -54,102 +54,76 @@ public class Graph {
     }
 
     public void trouverCheminLePlusCourt(String artiste1, String artiste2) {
-        System.out.println("Recherche du chemin le plus court entre " + artiste1 + " et " + artiste2);
-
-        if (!artistsByName.containsKey(artiste1)) {
-            System.out.println("Artiste non trouvé: " + artiste1);
-            return;
-        }
-        if (!artistsByName.containsKey(artiste2)) {
-            System.out.println("Artiste non trouvé: " + artiste2);
-            return;
+        if(!artistsByName.containsKey(artiste1) || !artistsByName.containsKey(artiste2)){
+            throw new IllegalArgumentException();
         }
 
-        int idArtiste1 = artistsByName.get(artiste1);
-        int idArtiste2 = artistsByName.get(artiste2);
-        Artist sourceArtist = artists.get(idArtiste1);
-        Artist destinationArtist = artists.get(idArtiste2);
+        Set<Artist> visited = new HashSet<>();
+        Stack<Noeud> firstLayer = new Stack<>();
+        Noeud first = new Noeud(artists.get(artistsByName.get(artiste1)), null, 1);
+        firstLayer.push(first);
+        visited.add(first.artist);
 
+        Noeud noeud = trouverCheminLePlusCourt(firstLayer, visited, artists.get(artistsByName.get(artiste2)));
 
-        // Map pour stocker la distance minimale de l'artiste source à chaque artiste
-        Map<Integer, Double> distances = new HashMap<>();
-
-        // Map pour stocker le prédécesseur de chaque artiste dans le chemin le plus court
-        Map<Integer, Integer> predecesseurs = new HashMap<>();
-
-        // Map pour marquer les artistes déjà visités
-        Set<Integer> visites = new HashSet<>();
-
-        // Initialisation des distances à l'infini sauf pour l'artiste source
-        for (Integer id : artists.keySet()) {
-            distances.put(id, Double.MAX_VALUE);
+        if(noeud==null){
+            throw new RuntimeException("aucun chemin entre "+artiste1+" et "+artiste2);
         }
-        distances.put(idArtiste1, 0.0);
 
-        // Algorithme de Dijkstra
-        while (visites.size() < artists.size()) {
-            // Trouver l'artiste non visité avec la distance minimale
-            Integer artisteActuel = null;
-            double minDistance = Double.MAX_VALUE;
+        double cost = -1;
+        List<Artist> path = new LinkedList<>();
+        while(noeud != null){
+            path.addFirst(noeud.artist);
+            cost += ((double) 1) / noeud.occurrence;
+            noeud = noeud.parent;
+        }
+        int distance = path.size()-1;
 
-            for (Integer id : artists.keySet()) {
-                if (!visites.contains(id) && distances.get(id) < minDistance) {
-                    minDistance = distances.get(id);
-                    artisteActuel = id;
-                }
+        System.out.println("Longueur du chemin : "+distance);
+        System.out.println("Coût total du chemin : "+cost);
+        System.out.println("Chemin:");
+        for (Artist artist: path){
+            System.out.print(artist.getNom()+" (");
+            for (String categorie: artist.getCategories()){
+                System.out.print(categorie+";");
             }
+            System.out.println("\b)");
+        }
+    }
 
-            // Si aucun artiste accessible n'est trouvé, sortir de la boucle
-            if (artisteActuel == null) break;
+    private Noeud trouverCheminLePlusCourt(Stack<Noeud> currentLayer, Set<Artist> visited, Artist end){
+        Stack<Noeud> nextLayer = new Stack<>();
 
-            // Marquer l'artiste actuel comme visité
-            visites.add(artisteActuel);
+        while(!currentLayer.empty()){
+            Noeud current = currentLayer.pop();
 
-            // Si nous avons atteint l'artiste destination, nous pouvons arrêter
-            if (artisteActuel.equals(idArtiste2)) break;
-
-            // Mettre à jour les distances des artistes voisins
-            Artist artiste = artists.get(artisteActuel);
-            for (Link link : artiste.getLinks()) {
-                Artist voisin = link.getDestination();
-                int idVoisin = (int) voisin.getId();
-
-                // Calculer la nouvelle distance en ajoutant 1/occurrence comme coût
-                double nouveauCout = distances.get(artisteActuel) + (1.0 / link.getOccurrence());
-
-                // Si la nouvelle distance est plus petite, mettre à jour
-                if (nouveauCout < distances.get(idVoisin)) {
-                    distances.put(idVoisin, nouveauCout);
-                    predecesseurs.put(idVoisin, artisteActuel);
+            for (Link link: current.artist.getLinks()){
+                Noeud next = new Noeud(link.getDestination(), current, link.getOccurrence());
+                if(link.getDestination().equals(end)){
+                    return next;
+                }else if(!visited.contains(link.getDestination())){
+                    visited.add(next.artist);
+                    nextLayer.push(next);
                 }
             }
         }
 
-        // Reconstruire le chemin
-        if (!predecesseurs.containsKey(idArtiste2)) {
-            System.out.println("Aucun chemin n'a été trouvé entre " + artiste1 + " et " + artiste2);
-            return;
+        if(nextLayer.empty()){
+            return null;
         }
+        return trouverCheminLePlusCourt(nextLayer, visited, end);
+    }
 
-        List<Integer> chemin = new ArrayList<>();
-        Integer courant = idArtiste2;
+    private class Noeud{
+        private Artist artist;
+        private Noeud parent;
+        private int occurrence;
 
-        while (courant != null) {
-            chemin.add(0, courant);
-            courant = predecesseurs.get(courant);
+        public Noeud(Artist artist, Noeud parent, int occurrence){
+            this.artist = artist;
+            this.parent = parent;
+            this.occurrence = occurrence;
         }
-
-        // Afficher le résultat
-        System.out.println("Longueur du chemin : " + (chemin.size() - 1));
-        System.out.println("Coût total du chemin : " + distances.get(idArtiste2));
-        System.out.println("Chemin :");
-
-        for (Integer id : chemin) {
-            Artist a = artists.get(id);
-            System.out.println(a.getNom() + " (" + String.join(";", a.getCategories()) + ")");
-        }
-
-
     }
 
     public void trouverCheminMaxMentions(String artiste1, String artiste2) {
