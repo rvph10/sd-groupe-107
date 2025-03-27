@@ -59,14 +59,28 @@ public class Graph {
         }
 
         Set<Artist> visited = new HashSet<>();
-        Stack<Noeud> firstLayer = new Stack<>();
-        Noeud first = new Noeud(artists.get(artistsByName.get(artiste1)), null, 1);
-        firstLayer.push(first);
-        visited.add(first.artist);
+        Queue<Noeud> waiting = new LinkedList<>();
+        Noeud noeud = new Noeud(artists.get(artistsByName.get(artiste1)), null, 1);
+        waiting.add(noeud);
+        visited.add(noeud.artist);
+        Artist goal = artists.get(artistsByName.get(artiste2));
 
-        Noeud noeud = trouverCheminLePlusCourt(firstLayer, visited, artists.get(artistsByName.get(artiste2)));
+        searching:
+        while(!waiting.isEmpty()){
+            Noeud current = waiting.remove();
 
-        if(noeud==null){
+            for (Link link: current.artist.getLinks()){
+                noeud = new Noeud(link.getDestination(), current, link.getOccurrence());
+                if(link.getDestination().equals(goal)){
+                    break searching;
+                }else if(!visited.contains(link.getDestination())){
+                    visited.add(noeud.artist);
+                    waiting.add(noeud);
+                }
+            }
+        }
+
+        if(!noeud.artist.equals(goal)){
             throw new RuntimeException("aucun chemin entre "+artiste1+" et "+artiste2);
         }
 
@@ -89,29 +103,6 @@ public class Graph {
             }
             System.out.println("\b)");
         }
-    }
-
-    private Noeud trouverCheminLePlusCourt(Stack<Noeud> currentLayer, Set<Artist> visited, Artist end){
-        Stack<Noeud> nextLayer = new Stack<>();
-
-        while(!currentLayer.empty()){
-            Noeud current = currentLayer.pop();
-
-            for (Link link: current.artist.getLinks()){
-                Noeud next = new Noeud(link.getDestination(), current, link.getOccurrence());
-                if(link.getDestination().equals(end)){
-                    return next;
-                }else if(!visited.contains(link.getDestination())){
-                    visited.add(next.artist);
-                    nextLayer.push(next);
-                }
-            }
-        }
-
-        if(nextLayer.empty()){
-            return null;
-        }
-        return trouverCheminLePlusCourt(nextLayer, visited, end);
     }
 
     private class Noeud{
