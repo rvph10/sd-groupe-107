@@ -118,7 +118,99 @@ public class Graph {
     }
 
     public void trouverCheminMaxMentions(String artiste1, String artiste2) {
-        // todo
-        return;
+        if (!artistsByName.containsKey(artiste1)) {
+            System.out.println("Artiste non trouvé: " + artiste1);
+            return;
+        }
+        if (!artistsByName.containsKey(artiste2)) {
+            System.out.println("Artiste non trouvé: " + artiste2);
+            return;
+        }
+
+        int idArtiste1 = artistsByName.get(artiste1);
+        int idArtiste2 = artistsByName.get(artiste2);
+        Artist sourceArtist = artists.get(idArtiste1);
+        Artist destinationArtist = artists.get(idArtiste2);
+
+
+        // Map pour stocker la distance minimale de l'artiste source à chaque artiste
+        Map<Integer, Double> distances = new HashMap<>();
+
+        // Map pour stocker le prédécesseur de chaque artiste dans le chemin le plus court
+        Map<Integer, Integer> predecesseurs = new HashMap<>();
+
+        // Map pour marquer les artistes déjà visités
+        Set<Integer> visites = new HashSet<>();
+
+        // Initialisation des distances à l'infini sauf pour l'artiste source
+        for (Integer id : artists.keySet()) {
+            distances.put(id, Double.MAX_VALUE);
+        }
+        distances.put(idArtiste1, 0.0);
+
+        // Algorithme de Dijkstra
+        while (visites.size() < artists.size()) {
+            // Trouver l'artiste non visité avec la distance minimale
+            Integer artisteActuel = null;
+            double minDistance = Double.MAX_VALUE;
+
+            for (Integer id : artists.keySet()) {
+                if (!visites.contains(id) && distances.get(id) < minDistance) {
+                    minDistance = distances.get(id);
+                    artisteActuel = id;
+                }
+            }
+
+            // Si aucun artiste accessible n'est trouvé, sortir de la boucle
+            if (artisteActuel == null) break;
+
+            // Marquer l'artiste actuel comme visité
+            visites.add(artisteActuel);
+
+            // Si nous avons atteint l'artiste destination, nous pouvons arrêter
+            if (artisteActuel.equals(idArtiste2)) break;
+
+            // Mettre à jour les distances des artistes voisins
+            Artist artiste = artists.get(artisteActuel);
+            for (Link link : artiste.getLinks()) {
+                Artist voisin = link.getDestination();
+                int idVoisin = (int) voisin.getId();
+
+                // Calculer la nouvelle distance en ajoutant 1/occurrence comme coût
+                double nouveauCout = distances.get(artisteActuel) + (1.0 / link.getOccurrence());
+
+                // Si la nouvelle distance est plus petite, mettre à jour
+                if (nouveauCout < distances.get(idVoisin)) {
+                    distances.put(idVoisin, nouveauCout);
+                    predecesseurs.put(idVoisin, artisteActuel);
+                }
+            }
+        }
+
+
+        // Reconstruire le chemin
+        if (!predecesseurs.containsKey(idArtiste2)) {
+            System.out.println("Aucun chemin n'a été trouvé entre " + artiste1 + " et " + artiste2);
+            return;
+        }
+
+        List<Integer> chemin = new ArrayList<>();
+        Integer courant = idArtiste2;
+
+        while (courant != null) {
+            chemin.add(0, courant);
+            courant = predecesseurs.get(courant);
+        }
+
+        // Afficher le résultat
+        System.out.println("Longueur du chemin : " + (chemin.size() - 1));
+        System.out.println("Coût total du chemin : " + distances.get(idArtiste2));
+        System.out.println("Chemin :");
+
+        for (Integer id : chemin) {
+            Artist a = artists.get(id);
+            System.out.println(a.getNom() + " (" + String.join(";", a.getCategories()) + ")");
+        }
+
     }
 }
