@@ -132,43 +132,29 @@ public class Graph {
         Artist sourceArtist = artists.get(idArtiste1);
         Artist destinationArtist = artists.get(idArtiste2);
 
-
         // Map pour stocker la distance minimale de l'artiste source à chaque artiste
         Map<Integer, Double> distances = new HashMap<>();
 
         // Map pour stocker le prédécesseur de chaque artiste dans le chemin le plus court
         Map<Integer, Integer> predecesseurs = new HashMap<>();
 
-        // Map pour marquer les artistes déjà visités
-        Set<Integer> visites = new HashSet<>();
+        // PriorityQueue pour sélectionner l'artiste avec la distance minimale
+        PriorityQueue<ArtistDistance> queue = new PriorityQueue<>(Comparator.comparingDouble(ad -> ad.distance));
 
         // Initialisation des distances à l'infini sauf pour l'artiste source
         for (Integer id : artists.keySet()) {
             distances.put(id, Double.MAX_VALUE);
         }
         distances.put(idArtiste1, 0.0);
+        queue.add(new ArtistDistance(idArtiste1, 0.0));
 
         // Algorithme de Dijkstra
-        while (visites.size() < artists.size()) {
-            // Trouver l'artiste non visité avec la distance minimale
-            Integer artisteActuel = null;
-            double minDistance = Double.MAX_VALUE;
-
-            for (Integer id : artists.keySet()) {
-                if (!visites.contains(id) && distances.get(id) < minDistance) {
-                    minDistance = distances.get(id);
-                    artisteActuel = id;
-                }
-            }
-
-            // Si aucun artiste accessible n'est trouvé, sortir de la boucle
-            if (artisteActuel == null) break;
-
-            // Marquer l'artiste actuel comme visité
-            visites.add(artisteActuel);
+        while (!queue.isEmpty()) {
+            ArtistDistance current = queue.poll();
+            int artisteActuel = current.artistId;
 
             // Si nous avons atteint l'artiste destination, nous pouvons arrêter
-            if (artisteActuel.equals(idArtiste2)) break;
+            if (artisteActuel == idArtiste2) break;
 
             // Mettre à jour les distances des artistes voisins
             Artist artiste = artists.get(artisteActuel);
@@ -183,10 +169,10 @@ public class Graph {
                 if (nouveauCout < distances.get(idVoisin)) {
                     distances.put(idVoisin, nouveauCout);
                     predecesseurs.put(idVoisin, artisteActuel);
+                    queue.add(new ArtistDistance(idVoisin, nouveauCout));
                 }
             }
         }
-
 
         // Reconstruire le chemin
         if (!predecesseurs.containsKey(idArtiste2)) {
@@ -211,6 +197,15 @@ public class Graph {
             Artist a = artists.get(id);
             System.out.println(a.getNom() + " (" + String.join(";", a.getCategories()) + ")");
         }
+    }
 
+    private static class ArtistDistance {
+        int artistId;
+        double distance;
+
+        ArtistDistance(int artistId, double distance) {
+            this.artistId = artistId;
+            this.distance = distance;
+        }
     }
 }
