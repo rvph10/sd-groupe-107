@@ -2,7 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-
+import java.util.function.ToDoubleBiFunction;
 
 
 public class Graph {
@@ -54,92 +54,71 @@ public class Graph {
     }
 
     public void trouverCheminLePlusCourt(String artiste1, String artiste2) {
-        // TODO
-        return;
-    }
-
-    public void trouverCheminMaxMentions(String artiste1, String artiste2) {
-        System.out.println("Début de la recherche du chemin avec Max mentions...");
-        if (!artistsByName.containsKey(artiste1) || !artistsByName.containsKey(artiste2)) {
-            throw new IllegalArgumentException("Un des artistes n'existe pas dans le graphe.");
+        if(!artistsByName.containsKey(artiste1) || !artistsByName.containsKey(artiste2)){
+            throw new IllegalArgumentException();
         }
 
-        int idArtiste1 = artistsByName.get(artiste1);
-        int idArtiste2 = artistsByName.get(artiste2);
+        Set<Artist> visited = new HashSet<>();
+        Queue<Noeud> waiting = new ArrayDeque<>();
+        Noeud noeud = new Noeud(artists.get(artistsByName.get(artiste1)), null, 1);
+        waiting.add(noeud);
+        visited.add(noeud.artist);
+        Artist goal = artists.get(artistsByName.get(artiste2));
 
-        // Map pour stocker le "score" maximal de mentions pour chaque artiste
-        Map<Integer, Double> scores = new HashMap<>();
+        searching:
+        while(!waiting.isEmpty()){
+            Noeud current = waiting.remove();
 
-        // Map pour stocker le prédécesseur de chaque artiste dans le chemin optimal
-        Map<Integer, Integer> predecesseurs = new HashMap<>();
-
-        // File de priorité pour visiter les artistes dans l'ordre décroissant de leur score
-        PriorityQueue<Integer> file = new PriorityQueue<>((a, b) ->
-                Double.compare(scores.get(b), scores.get(a)));
-
-        // Initialisation des scores à 0 sauf pour l'artiste source
-        for (Integer id : artists.keySet()) {
-            scores.put(id, 0.0);
-        }
-        scores.put(idArtiste1, 1.0); // Commencer avec un score de 1 pour l'artiste source
-
-        file.add(idArtiste1);
-
-        // Ensemble pour marquer les artistes déjà traités définitivement
-        Set<Integer> traites = new HashSet<>();
-
-        while (!file.isEmpty()) {
-            Integer artisteActuel = file.poll();
-
-            // Si cet artiste a déjà été traité, passer au suivant
-            if (traites.contains(artisteActuel)) continue;
-
-            // Marquer l'artiste comme traité
-            traites.add(artisteActuel);
-
-            // Si nous avons atteint l'artiste destination, nous pouvons arrêter
-            if (artisteActuel.equals(idArtiste2)) break;
-
-            // Mettre à jour les scores des artistes voisins
-            Artist artiste = artists.get(artisteActuel);
-            for (Link link : artiste.getLinks()) {
-                Artist voisin = link.getDestination();
-                int idVoisin = (int) voisin.getId();
-
-                // Calculer le nouveau score en multipliant par le nombre d'occurrences / (nbOccurrences + 1)
-                double nouveauScore = scores.get(artisteActuel) * link.getOccurrence() / (link.getOccurrence() + 1.0);
-
-                // Si le nouveau score est plus grand, mettre à jour
-                if (nouveauScore > scores.get(idVoisin)) {
-                    scores.put(idVoisin, nouveauScore);
-                    predecesseurs.put(idVoisin, artisteActuel);
-                    file.add(idVoisin); // Ajouter ou mettre à jour l'artiste dans la file de priorité
+            for (Link link: current.artist.getLinks()){
+                noeud = new Noeud(link.getDestination(), current, link.getOccurrence());
+                if(link.getDestination().equals(goal)){
+                    break searching;
+                }else if(!visited.contains(link.getDestination())){
+                    visited.add(noeud.artist);
+                    waiting.add(noeud);
                 }
             }
         }
 
-        // Reconstruire le chemin
-        if (!predecesseurs.containsKey(idArtiste2)) {
-            System.out.println("Aucun chemin n'a été trouvé entre " + artiste1 + " et " + artiste2);
-            return;
+        if(!noeud.artist.equals(goal)){
+            throw new RuntimeException("aucun chemin entre "+artiste1+" et "+artiste2);
         }
 
-        List<Integer> chemin = new ArrayList<>();
-        Integer courant = idArtiste2;
-
-        while (courant != null) {
-            chemin.add(0, courant);
-            courant = predecesseurs.get(courant);
+        double cost = -1;
+        List<Artist> path = new ArrayList<>();
+        while(noeud != null){
+            path.addFirst(noeud.artist);
+            cost += ((double) 1) / noeud.occurrence;
+            noeud = noeud.parent;
         }
+        int distance = path.size()-1;
 
-        // Afficher le résultat
-        System.out.println("Longueur du chemin : " + (chemin.size() - 1));
-        System.out.println("Coût total du chemin : " + (1.0 / scores.get(idArtiste2)));
+        System.out.println("Longueur du chemin : "+distance);
+        System.out.println("Coût total du chemin : "+cost);
         System.out.println("Chemin :");
-
-        for (Integer id : chemin) {
-            Artist a = artists.get(id);
-            System.out.println(a.getNom() + " (" + String.join(";", a.getCategories()) + ")");
+        for (Artist artist: path){
+            System.out.print(artist.getNom()+" (");
+            for (String categorie: artist.getCategories()){
+                System.out.print(categorie+";");
+            }
+            System.out.println("\b)");
         }
+    }
+
+    private class Noeud{
+        private Artist artist;
+        private Noeud parent;
+        private int occurrence;
+
+        public Noeud(Artist artist, Noeud parent, int occurrence){
+            this.artist = artist;
+            this.parent = parent;
+            this.occurrence = occurrence;
+        }
+    }
+
+    public void trouverCheminMaxMentions(String artiste1, String artiste2) {
+        // todo
+        return;
     }
 }
