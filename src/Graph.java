@@ -105,104 +105,83 @@ public class Graph {
         }
     }
 
+
+    public void trouverCheminMaxMentions(String artiste1, String artiste2) {
+        if (!artistsByName.containsKey(artiste1) || !artistsByName.containsKey(artiste2)) {
+            throw new IllegalArgumentException();
+        }
+
+        Queue<Noeud> waiting = new PriorityQueue<>(Comparator.comparingDouble(n -> n.distance));
+        Map<Artist, Noeud> distances = new HashMap<>();
+        Noeud noeud = new Noeud(artists.get(artistsByName.get(artiste1)), null, 1, 0);
+        waiting.add(noeud);
+        Artist goal = artists.get(artistsByName.get(artiste2));
+
+        while(!waiting.isEmpty()){
+            noeud = waiting.remove();
+
+            if(noeud.artist.equals(goal)){
+                break;
+            }
+
+            for(Link link: noeud.artist.getLinks()){
+                Artist artist = link.getDestination();
+
+                double cost = 1.0/link.getOccurrence();
+                distances.putIfAbsent(artist, new Noeud(artist, noeud, link.getOccurrence(), noeud.distance+cost+1));
+                Noeud next = distances.get(artist);
+
+                if(next.distance > noeud.distance+cost){
+                    next.distance = noeud.distance+cost;
+                    next.parent = noeud;
+                    waiting.add(next);
+                }
+            }
+        }
+
+        if(!noeud.artist.equals(goal)){
+            throw new RuntimeException("aucun chemin entre "+artiste1+" et "+artiste2);
+        }
+
+        double cost = noeud.distance;
+        List<Artist> path = new ArrayList<>();
+        while(noeud != null){
+            path.addFirst(noeud.artist);
+            noeud = noeud.parent;
+        }
+        int distance = path.size()-1;
+
+        System.out.println("Longueur du chemin : "+distance);
+        System.out.println("Coût total du chemin : "+cost);
+        System.out.println("Chemin :");
+        for (Artist artist: path){
+            System.out.print(artist.getNom()+" (");
+            for (String categorie: artist.getCategories()){
+                System.out.print(categorie+";");
+            }
+            System.out.println("\b)");
+        }
+
+    }
+
+
     private class Noeud{
         private Artist artist;
         private Noeud parent;
         private int occurrence;
+        private double distance;
 
         public Noeud(Artist artist, Noeud parent, int occurrence){
             this.artist = artist;
             this.parent = parent;
             this.occurrence = occurrence;
         }
-    }
 
-    public void trouverCheminMaxMentions(String artiste1, String artiste2) {
-        if (!artistsByName.containsKey(artiste1)) {
-            System.out.println("Artiste non trouvé: " + artiste1);
-            return;
-        }
-        if (!artistsByName.containsKey(artiste2)) {
-            System.out.println("Artiste non trouvé: " + artiste2);
-            return;
-        }
-
-        int idArtiste1 = artistsByName.get(artiste1);
-        int idArtiste2 = artistsByName.get(artiste2);
-
-        // Map pour stocker la distance minimale de l'artiste source à chaque artiste
-        Map<Integer, Double> distances = new HashMap<>();
-
-        // Map pour stocker le prédécesseur de chaque artiste dans le chemin le plus court
-        Map<Integer, Integer> predecesseurs = new HashMap<>();
-
-        // PriorityQueue pour sélectionner l'artiste avec la distance minimale
-        PriorityQueue<ArtistDistance> queue = new PriorityQueue<>(Comparator.comparingDouble(ad -> ad.distance));
-
-        // Initialisation des distances à l'infini sauf pour l'artiste source
-        for (Integer id : artists.keySet()) {
-            distances.put(id, Double.MAX_VALUE);
-        }
-        distances.put(idArtiste1, 0.0);
-        queue.add(new ArtistDistance(idArtiste1, 0.0));
-
-        // Algorithme de Dijkstra
-        while (!queue.isEmpty()) {
-            ArtistDistance current = queue.poll();
-            int artisteActuel = current.artistId;
-
-            // Si nous avons atteint l'artiste destination, nous pouvons arrêter
-            if (artisteActuel == idArtiste2) break;
-
-            // Mettre à jour les distances des artistes voisins
-            Artist artiste = artists.get(artisteActuel);
-            for (Link link : artiste.getLinks()) {
-                Artist voisin = link.getDestination();
-                int idVoisin = (int) voisin.getId();
-
-                // Calculer la nouvelle distance en ajoutant 1/occurrence comme coût
-                double nouveauCout = distances.get(artisteActuel) + (1.0 / link.getOccurrence());
-
-                // Si la nouvelle distance est plus petite, mettre à jour
-                if (nouveauCout < distances.get(idVoisin)) {
-                    distances.put(idVoisin, nouveauCout);
-                    predecesseurs.put(idVoisin, artisteActuel);
-                    queue.add(new ArtistDistance(idVoisin, nouveauCout));
-                }
-            }
-        }
-
-        // Reconstruire le chemin
-        if (!predecesseurs.containsKey(idArtiste2)) {
-            throw new RuntimeException("aucun chemin entre "+artiste1+" et "+artiste2);
-        }
-
-        List<Integer> chemin = new ArrayList<>();
-        Integer courant = idArtiste2;
-
-        while (courant != null) {
-            chemin.add(0, courant);
-            courant = predecesseurs.get(courant);
-        }
-
-        // Afficher le résultat
-        System.out.println("Longueur du chemin : " + (chemin.size() - 1));
-        System.out.println("Coût total du chemin : " + distances.get(idArtiste2));
-        System.out.println("Chemin :");
-
-        for (Integer id : chemin) {
-            Artist a = artists.get(id);
-            System.out.println(a.getNom() + " (" + String.join(";", a.getCategories()) + ")");
-        }
-    }
-
-    private static class ArtistDistance {
-        int artistId;
-        double distance;
-
-        ArtistDistance(int artistId, double distance) {
-            this.artistId = artistId;
+        public Noeud(Artist artist, Noeud parent, int occurrence, double distance){
+            this(artist, parent, occurrence);
             this.distance = distance;
         }
     }
+
+
 }
