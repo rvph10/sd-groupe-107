@@ -59,7 +59,7 @@ public class Graph {
         }
 
         Set<Artist> visited = new HashSet<>();
-        Queue<Noeud> waiting = new LinkedList<>();
+        Queue<Noeud> waiting = new ArrayDeque<>();
         Noeud noeud = new Noeud(artists.get(artistsByName.get(artiste1)), null, 1);
         waiting.add(noeud);
         visited.add(noeud.artist);
@@ -85,7 +85,7 @@ public class Graph {
         }
 
         double cost = -1;
-        List<Artist> path = new LinkedList<>();
+        List<Artist> path = new ArrayList<>();
         while(noeud != null){
             path.addFirst(noeud.artist);
             cost += ((double) 1) / noeud.occurrence;
