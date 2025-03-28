@@ -129,8 +129,6 @@ public class Graph {
 
         int idArtiste1 = artistsByName.get(artiste1);
         int idArtiste2 = artistsByName.get(artiste2);
-        Artist sourceArtist = artists.get(idArtiste1);
-        Artist destinationArtist = artists.get(idArtiste2);
 
         // Map pour stocker la distance minimale de l'artiste source à chaque artiste
         Map<Integer, Double> distances = new HashMap<>();
@@ -176,8 +174,7 @@ public class Graph {
 
         // Reconstruire le chemin
         if (!predecesseurs.containsKey(idArtiste2)) {
-            System.out.println("Aucun chemin n'a été trouvé entre " + artiste1 + " et " + artiste2);
-            return;
+            throw new RuntimeException("aucun chemin entre "+artiste1+" et "+artiste2);
         }
 
         List<Integer> chemin = new ArrayList<>();
